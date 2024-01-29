@@ -1,0 +1,119 @@
+---
+title: "Class Prep 5"
+author: "Abby Sikora"
+format: 
+  html:
+    embed-resources: true
+---
+
+```{r}
+library(tidyverse)
+library(here)
+theme_set(theme_minimal())
+hpi_df <- read_csv(here("data1/hpi-tidy.csv"))
+hpi_df
+```
+
+```{r}
+ggplot(data = hpi_df, aes(x = Footprint, y = Wellbeing)) +
+  geom_point()
+
+#only US data
+
+hpi_us <- hpi_df |> filter(Country == "United States of America")
+hpi_us
+
+ggplot(data = hpi_df, aes(x = Footprint, y = Wellbeing)) +
+  geom_point() +
+  geom_text(data = hpi_us, aes(label = Country)) ## specify
+
+library(ggrepel)
+
+ggplot(data = hpi_df, aes(x = Footprint, y = Wellbeing)) +
+  geom_point() +
+  geom_text_repel(data = hpi_us, aes(label = Country)) +
+  geom_point(data = hpi_us, size = 3, shape = 1)
+
+#to change labels
+ggplot(data = hpi_df, aes(x = Footprint, y = Wellbeing)) +
+  geom_point() +
+  geom_text_repel(data = hpi_us, aes(label = Country)) +
+  geom_point(data = hpi_us, size = 3, shape = 1) +
+  labs(title = "Countries with a Higher Ecological Footprint Tend to Have Citizens with Higher Wellbeing", ## add title
+    subtitle = "Wellbeing is on a 1-10 scale", ## add subtitle (smaller text size than the title)
+    caption = "Data Source: http://happyplanetindex.org/countries", ## add caption to the bottom of the figure
+    x = "Ecological Footprint", ## change x axis label
+    y = "Wellbeing")
+```
+
+Exercise 1: For each of the core dplyr functions mutate(), arrange(), select(), slice(), filter(), group_by(), and summarise(), write a one sentence summary of the overall purpose of the function.
+
+mutate(): mutate can be used to create new variables(columns) holding specfic information that you decide.
+
+arrange(): arrange is used when you want your data arranged in a certain order of rows.
+
+select(): select is for when you want to single out a specific variable(s)
+
+slice(): slice is when you want to get rid of specific rows in a data set
+
+filter(): filter is when you want to single out specific qualities of the data and only work with those qualities.
+
+group_by(): group_by is for splitting data frames into groups based on variables you give it
+
+
+Exercise 2: Review mutate(). Create a new variable in hpi_df that is equal to Wellbeing / Footprint.
+
+```{r}
+hpi_df |> mutate(new_var = Wellbeing / Footprint)
+```
+
+Exercise 3: Review mutate() and case_when(). Create a new variable in hpi_df that is equal to "80s" if LifeExp is in the 80’s, "70s" if LifeExp is in the 70s, and "Below 70" if LifeExp is less than 70.
+
+```{r}
+hpi_df |> mutate(new_var = case_when(LifeExpectancy > 79 & LifeExpectancy < 90 ~ "80's",
+                                     LifeExpectancy > 69 & LifeExpectancy < 80 ~ "70's",
+                                     LifeExpectancy < 70 ~ "Below 70"))
+```
+
+Exercise 4. Review arrange(). Sort the hpi_df data so that the country with the highest LifeExp is in the first row and the country with the lowest LifeExp is in the last row.
+
+```{r}
+hpi_df |> arrange(desc(LifeExpectancy))
+```
+
+Exercise 5. Review select(). Make a data frame from hpi_df that only has the variables Country and LifeExp.
+
+```{r}
+hpi_df |> select(Country, LifeExpectancy)
+```
+Exercise 6. Review slice(). Make a data frame from hpi_df that only has the first 5 rows.
+
+```{r}
+hpi_df |> slice(1:5)
+```
+
+Exercise 7. Review filter(). Make a data frame from hpi_df that only has countries in the "Western World" Region.
+
+```{r}
+hpi_df |> filter(Region == "Western World")
+```
+
+Exercise 8. Review filter(). Make a data frame from hpi_df that only has countries with a LifeExp less than 55.
+
+```{r}
+hpi_df |> filter(LifeExpectancy < 55)
+```
+
+Exercise 9. Review group_by() and summarise(). Make a table of the number of countries in each Region. (Hint: recall that the n() function is the counting function in dplyr).
+
+```{r}
+library(pander)
+hpi_df |> group_by(Region) |> summarize(n()) |> pander()
+```
+
+Exercise 10. Review group_by() and summarise(). Make a table with the maximum LifeExp in each Region.
+
+```{r}
+hpi_df |> group_by(Region) |>
+  summarize(max(LifeExpectancy)) |> pander()
+```
